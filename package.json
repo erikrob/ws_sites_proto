@@ -1,0 +1,9 @@
+{
+    "name": "ws_sites"
+  , "version": "0.0.1"
+  , "private": true
+  , "dependencies": {
+      "mongodb": ">= 0.0.1"
+    , "handlebars": ">= 0.0.1"
+  }
+}
