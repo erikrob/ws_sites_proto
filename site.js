@@ -19,6 +19,12 @@ exports.test_exist = function (db, pathname, response, request, callback_if_exis
 }
 
 
+http_response = function(response, result, content) {
+  response.writeHead(result, {"Content-Type": "text/html"});
+  response.write(content);
+  response.end();
+}
+
 //Constructor
 function Site(db, site_id) {
   this.db = db;
@@ -27,9 +33,23 @@ function Site(db, site_id) {
 
 //Public methods
 Site.prototype.request = function (path, response, request) {
-    response.writeHead(200, {"Content-Type": "text/html"});
-    response.write("Welcome to processing of site_id: " + this.site_id + ", path:" + path);
-    response.end();
+  //this.db.collection('site_content', this._request_collection_cb);
+  var that=this;
+  this.db.collection('site_content', function(error, collection) {
+    console.log(that.site_id);
+    console.log(path);
+    collection.findOne({'site_id':that.site_id, 'page':path}, function(err, rec) {
+      if (rec) {
+        console.log("Found content context for site_id " + that.site_id + ", path:" + path);
+        var context = rec;
+        var template_content = "";
+        console.log(context);
+        this.http_response(response, 200, context.toString());
+      } else {
+        this.http_response(response, 200, "No content found in db for site_id " + that.site_id + ", path:" + path);
+      }
+    });
+  });
 }
 
 exports.Site = Site;
