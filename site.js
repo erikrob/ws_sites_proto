@@ -33,7 +33,6 @@ function Site(db, site_id) {
 
 //Public methods
 Site.prototype.request = function (path, response, request) {
-  //this.db.collection('site_content', this._request_collection_cb);
   var that=this;
   that.db.collection('site_content', function(error, site_content_collection) {
     // Find page content

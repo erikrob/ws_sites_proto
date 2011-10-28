@@ -5,8 +5,6 @@ var mongodb = require("mongodb");
 var site = require("./site");
 
 function hello(response) {
-  console.log("Request handler 'hello' was called.");
-
   response.writeHead(200, {"Content-Type": "text/html"});
   response.write("Welcome to the GEM FFD web site");
   response.end();
