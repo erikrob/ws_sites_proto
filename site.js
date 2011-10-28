@@ -35,18 +35,30 @@ function Site(db, site_id) {
 Site.prototype.request = function (path, response, request) {
   //this.db.collection('site_content', this._request_collection_cb);
   var that=this;
-  this.db.collection('site_content', function(error, collection) {
-    console.log(that.site_id);
-    console.log(path);
-    collection.findOne({'site_id':that.site_id, 'page':path}, function(err, rec) {
-      if (rec) {
+  that.db.collection('site_content', function(error, site_content_collection) {
+    // Find page content
+    site_content_collection.findOne({'site_id':that.site_id, 'page':path}, function(err, site_content_rec) {
+      if (site_content_rec) {
         console.log("Found content context for site_id " + that.site_id + ", path:" + path);
-        var context = rec;
-        var template_content = "";
-        console.log(context);
-        this.http_response(response, 200, context.toString());
+        var context = site_content_rec;
+        var template_name = site_content_rec.html_template;
+        console.log("template_name: "+template_name)
+        // Find html template
+        that.db.collection('html_templates', function(error, html_templates_collection) {
+          html_templates_collection.findOne({'name':template_name}, function(err, html_template_rec) {
+            if (html_template_rec) {
+              console.log("Found " + template_name + " html template for site_id " + that.site_id + ", path:" + path);
+              //We now have a template and the content... now render!
+              var template = handlebars.compile(html_template_rec.text);
+              var html = template(context);
+              http_response(response, 200, html);
+            } else {
+              http_response(response, 200, "No html template found in db for site_id " + that.site_id + ", path:" + path);
+            }
+          });
+        });
       } else {
-        this.http_response(response, 200, "No content found in db for site_id " + that.site_id + ", path:" + path);
+        http_response(response, 200, "No content found in db for site_id " + that.site_id + ", path:" + path);
       }
     });
   });
